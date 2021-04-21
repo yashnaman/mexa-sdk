@@ -74,7 +74,7 @@ function Biconomy(provider, options) {
   this.strictMode = options.strictMode || false;
   this.providerId = options.providerId || 0;
   this.readViaContract = options.readViaContract || false;
-  
+
   this.READY = STATUS.BICONOMY_READY;
   this.LOGIN_CONFIRMATION = EVENTS.LOGIN_CONFIRMATION;
   this.ERROR = EVENTS.BICONOMY_ERROR;
@@ -85,26 +85,26 @@ function Biconomy(provider, options) {
   this.originalProvider = provider;
   this.isEthersProviderPresent = false;
   this.canSignMessages = false;
-  
+
   if (options.debug) {
     config.logsEnabled = true;
   }
-  
-  if(options.walletProvider) {
-    if(isEthersProvider(options.walletProvider)) {
-      throw new Error("Wallet Provider in options can't be an ethers provider. Please pass the provider you get from your wallet directly.")
+
+  if (options.walletProvider) {
+    if (isEthersProvider(options.walletProvider)) {
+      throw new Error("Wallet Provider in options can't be an ethers provider. Please pass the provider you get from your wallet directly.");
     }
     this.walletProvider = new ethers.providers.Web3Provider(options.walletProvider);
   }
-  
+
   if (provider) {
-    if(isEthersProvider(provider)) {
+    if (isEthersProvider(provider)) {
       this.ethersProvider = provider;
       this.isEthersProviderPresent = true;
     } else {
       this.ethersProvider = new ethers.providers.Web3Provider(provider);
     }
-      
+
     _init(this.apiKey, this);
     const proto = Object.getPrototypeOf(provider);
     const keys = Object.getOwnPropertyNames(proto);
@@ -128,17 +128,17 @@ function Biconomy(provider, options) {
           jsonrpc: "2.0",
           method: payload,
           params: cb
-        }
+        };
       }
 
       if (payload.method == "eth_sendTransaction") {
-        return new Promise((resolve, reject)=>{
+        return new Promise((resolve, reject) => {
           handleSendTransaction(this, payload, (error, result) => {
             let response = this._createJsonRpcResponse(payload, error, result);
             if (cb && !self.isEthersProviderPresent) {
               cb(error, response);
             }
-            if(response.error) {
+            if (response.error) {
               reject(response.error);
             } else {
               resolve(response.result);
@@ -146,13 +146,13 @@ function Biconomy(provider, options) {
           });
         });
       } else if (payload.method == "eth_sendRawTransaction") {
-        return new Promise((resolve, reject)=>{
+        return new Promise((resolve, reject) => {
           sendSignedTransaction(this, payload, (error, result) => {
             let response = this._createJsonRpcResponse(payload, error, result);
             if (cb && !self.isEthersProviderPresent) {
               cb(error, response);
             }
-            if(response.error) {
+            if (response.error) {
               reject(response.error);
             } else {
               resolve(response.result);
@@ -221,11 +221,11 @@ function Biconomy(provider, options) {
               payload.method,
               payload.params
             );
-            if(self.isEthersProviderPresent) {
+            if (self.isEthersProviderPresent) {
               try {
                 let localResult = await self.originalProvider.send(jsonRPCPaylod.method, jsonRPCPaylod.params);
                 resolve(localResult);
-              } catch(error) {
+              } catch (error) {
                 reject(error);
               }
             } else {
@@ -257,19 +257,19 @@ function Biconomy(provider, options) {
   }
 }
 
-Biconomy.prototype.getSignerByAddress = function(userAddress) {
+Biconomy.prototype.getSignerByAddress = function (userAddress) {
   let provider = this.getEthersProvider();
   let signer = provider.getSigner();
   signer = signer.connectUnchecked();
   signer.getAddress = async () => {
-    return userAddress
-  }
+    return userAddress;
+  };
   return signer;
-}
+};
 
-Biconomy.prototype.getEthersProvider = function() {
+Biconomy.prototype.getEthersProvider = function () {
   return new ethers.providers.Web3Provider(this);
-}
+};
 
 Biconomy.prototype.getForwardRequestAndMessageToSign = function (
   rawTransaction,
@@ -495,7 +495,7 @@ Biconomy.prototype._createJsonRpcResponse = function (payload, error, result) {
     response = result;
   }
   return response;
-}
+};
 
 function decodeMethod(to, data) {
   if (to && data && decoderMap[to]) {
@@ -772,7 +772,7 @@ async function handleSendTransaction(engine, payload, end) {
       if (!methodInfo) {
         methodInfo = decodeMethod(config.SCW, payload.params[0].data);
       }
-      if(!methodInfo) {
+      if (!methodInfo) {
         let error = {};
         error.code = RESPONSE_CODES.WRONG_ABI;
         error.message = `Can't decode method information from payload. Make sure you have uploaded correct ABI on Biconomy Dashboard`;
@@ -788,7 +788,7 @@ async function handleSendTransaction(engine, payload, end) {
         api = engine.dappAPIMap[config.SCW]
           ? engine.dappAPIMap[config.SCW][methodName]
           : undefined;
-          metaTxApproach = smartContractMetaTransactionMap[config.SCW];
+        metaTxApproach = smartContractMetaTransactionMap[config.SCW];
       } else {
         let contractAddr = api.contractAddress.toLowerCase();
         metaTxApproach = smartContractMetaTransactionMap[contractAddr];
@@ -857,7 +857,7 @@ async function handleSendTransaction(engine, payload, end) {
           let contractABI = smartContractMap[to];
           if (contractABI) {
             let contract = new ethers.Contract(to, JSON.parse(contractABI), engine.ethersProvider);
-            gasLimitNum = await contract.estimateGas[methodName](...paramArrayForGasCalculation, {from: account});
+            gasLimitNum = await contract.estimateGas[methodName](...paramArrayForGasCalculation, { from: account });
 
             _logMessage(`Gas limit calculated for method ${methodName} in SDK: ${gasLimitNum}`);
           }
@@ -886,7 +886,7 @@ async function handleSendTransaction(engine, payload, end) {
             const domainSeparator = getDomainSeperator(
               forwarderDomainData
             );
-            _logMessage("Domain separator to be used:")
+            _logMessage("Domain separator to be used:");
             _logMessage(domainSeparator);
             paramArray.push(domainSeparator);
             let signatureEIP712;
@@ -914,10 +914,10 @@ async function handleSendTransaction(engine, payload, end) {
               );
               _logMessage(`Personal signature is ${signaturePersonal}`);
             }
-            if(signaturePersonal) {
+            if (signaturePersonal) {
               paramArray.push(signaturePersonal);
             } else {
-              throw new Error("Could not get personal signature while processing transaction in Mexa SDK. Please check the providers you have passed to Biconomy")
+              throw new Error("Could not get personal signature while processing transaction in Mexa SDK. Please check the providers you have passed to Biconomy");
             }
           }
 
@@ -980,11 +980,11 @@ async function handleSendTransaction(engine, payload, end) {
 
 function callDefaultProvider(engine, payload, callback, errorMessage) {
   let targetProvider = engine.originalProvider;
-  if(targetProvider) {
-    if(!engine.canSignMessages) {
+  if (targetProvider) {
+    if (!engine.canSignMessages) {
       throw new Error(errorMessage);
     } else {
-      if(engine.isEthersProviderPresent) {
+      if (engine.isEthersProviderPresent) {
         return engine.originalProvider.send(payload.method, payload.params);
       } else {
         return engine.originalProvider.send(payload, callback);
@@ -996,7 +996,7 @@ function callDefaultProvider(engine, payload, callback, errorMessage) {
 }
 
 function _getEIP712ForwardMessageToSign(request) {
-  if(!forwarderDomainType || !forwardRequestType || !forwarderDomainData) {
+  if (!forwarderDomainType || !forwardRequestType || !forwarderDomainData) {
     throw new Error("Biconomy is not properly initialized");
   }
 
@@ -1041,10 +1041,10 @@ function _getPersonalForwardMessageToSign(request) {
 
 function getTargetProvider(engine) {
   let provider;
-  if(engine) {
+  if (engine) {
     provider = engine.originalProvider;
-    if(!engine.canSignMessages) {
-      if(!engine.walletProvider) {
+    if (!engine.canSignMessages) {
+      if (!engine.walletProvider) {
         throw new Error(`Please pass a provider connected to a wallet that can sign messages in Biconomy options.`);
       }
       provider = engine.walletProvider;
@@ -1056,10 +1056,11 @@ function getTargetProvider(engine) {
 function getSignatureEIP712(engine, account, request) {
   const dataToSign = _getEIP712ForwardMessageToSign(request);
 
-  let targetProvider = getTargetProvider(engine);
+  // let targetProvider = getTargetProvider(engine);
+  let targetProvider = engine.walletProvider;
   const promi = new Promise(async function (resolve, reject) {
-    if(targetProvider) {
-      if(isEthersProvider(targetProvider)) {
+    if (targetProvider) {
+      if (isEthersProvider(targetProvider)) {
         let signature = await targetProvider.send("eth_signTypedData_v3", [account, dataToSign]);
         resolve(signature);
       } else {
@@ -1089,18 +1090,18 @@ function getSignatureEIP712(engine, account, request) {
 
 async function getSignaturePersonal(engine, req) {
   const hashToSign = _getPersonalForwardMessageToSign(req);
-  if(!engine.signer && !engine.walletProvider) {
+  if (!engine.signer && !engine.walletProvider) {
     throw new Error(`Can't sign messages with current provider. Did you forget to pass walletProvider in Biconomy options?`);
   }
   let signature;
-  if(engine.canSignMessages) {
+  if (engine.canSignMessages) {
     signature = await engine.signer.signMessage(ethers.utils.arrayify(hashToSign));
-  } else if(engine.walletProvider) {
+  } else if (engine.walletProvider) {
     let walletSigner = await engine.walletProvider.getSigner();
     try {
       signature = await walletSigner.signMessage(ethers.utils.arrayify(hashToSign));
-    } catch(error) {
-      throw new Error("Can't get signature from Wallet Provider passed to Biconomy options. Make sure wallet provider you have passed can sign messages.")
+    } catch (error) {
+      throw new Error("Can't get signature from Wallet Provider passed to Biconomy options. Make sure wallet provider you have passed can sign messages.");
     }
   }
   return signature;
@@ -1267,7 +1268,7 @@ function _getUserAccount(engine, payload, cb) {
           params: [],
         },
         (error, response) => {
-            cb(error, response);
+          cb(error, response);
         }
       );
     } else {
@@ -1586,7 +1587,7 @@ async function onNetworkId(engine, { providerNetworkId, dappNetworkId, apiKey, d
             )
           );
         }
-        
+
         // check if Valid trusted forwarder address is present from system info
         if (engine.forwarderAddress && engine.forwarderAddress != "") {
           biconomyForwarder = new ethers.Contract(

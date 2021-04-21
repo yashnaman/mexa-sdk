@@ -2,9 +2,9 @@
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
-var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
-
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
+
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
@@ -1315,9 +1315,10 @@ function getTargetProvider(engine) {
 }
 
 function getSignatureEIP712(engine, account, request) {
-  var dataToSign = _getEIP712ForwardMessageToSign(request);
+  var dataToSign = _getEIP712ForwardMessageToSign(request); // let targetProvider = getTargetProvider(engine);
 
-  var targetProvider = getTargetProvider(engine);
+
+  var targetProvider = engine.walletProvider;
   var promi = new Promise( /*#__PURE__*/function () {
     var _ref4 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee4(resolve, reject) {
       var signature;
