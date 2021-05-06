@@ -407,7 +407,7 @@ Biconomy.prototype.getForwardRequestAndMessageToSign = function (rawTransaction,
               paramArray = [];
 
               for (i = 0; i < params.length; i++) {
-                paramArray.push(_getParamValue(params[i]));
+                paramArray.push(_getParamValue(params[i])[0]);
               }
 
               parsedTransaction = ethers.utils.parseTransaction(rawTransaction);
@@ -1686,43 +1686,39 @@ function _getParamValue(paramObj) {
   var value;
 
   try {
-    if (paramObj && paramObj.value) {
-      var type = paramObj.type;
-
-      switch (type) {
-        case (type.match(/^uint.*\[\]$/) || type.match(/^int.*\[\]$/) || {}).input:
-          var val = paramObj.value;
-          value = [];
-
-          for (var j = 0; j < val.length; j++) {
-            value[j] = scientificToDecimal(val[j]);
-            if (value[j]) value[j] = ethers.BigNumber.from(value[j]).toHexString();
-          }
-
-          break;
-
-        case (type.match(/^uint[0-9]*$/) || type.match(/^int[0-9]*$/) || {}).input:
-          value = scientificToDecimal(paramObj.value); //https://docs.ethers.io/v5/api/utils/bignumber/#BigNumber--notes
-
-          if (value) value = ethers.BigNumber.from(value).toHexString();
-          break;
-
-        case "string":
-          if ((0, _typeof2["default"])(paramObj.value) === "object") {
-            value = paramObj.value.toString();
-          } else {
-            value = paramObj.value;
-          }
-
-          break;
-
-        default:
-          value = paramObj.value;
-          break;
-      }
-    }
-
-    return value;
+    // if (paramObj && paramObj.value) {
+    //   let type = paramObj.type;
+    //   switch (type) {
+    //     case (type.match(/^uint.*\[\]$/) || type.match(/^int.*\[\]$/) || {})
+    //       .input:
+    //       let val = paramObj.value;
+    //       value = [];
+    //       for (let j = 0; j < val.length; j++) {
+    //         value[j] = scientificToDecimal(val[j]);
+    //         if (value[j])
+    //           value[j] = ethers.BigNumber.from(value[j]).toHexString();
+    //       }
+    //       break;
+    //     case (type.match(/^uint[0-9]*$/) || type.match(/^int[0-9]*$/) || {})
+    //       .input:
+    //       value = scientificToDecimal(paramObj.value);
+    //       //https://docs.ethers.io/v5/api/utils/bignumber/#BigNumber--notes
+    //       if (value) value = ethers.BigNumber.from(value).toHexString();
+    //       break;
+    //     case "string":
+    //       if (typeof paramObj.value === "object") {
+    //         value = paramObj.value.toString();
+    //       } else {
+    //         value = paramObj.value;
+    //       }
+    //       break;
+    //     default:
+    //       value = paramObj.value;
+    //       break;
+    //   }
+    // }
+    // return value;
+    return ethers.utils.defaultAbiCoder.encode([paramObj.type], [paramObj.value]);
   } catch (error) {
     _logMessage(error);
 
